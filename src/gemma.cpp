@@ -845,6 +845,7 @@ void GEMMA::Assign(int argc, char ** argv, PARAM &cPar)
 			str.assign(argv[i]);
 			cPar.a_mode=50+atoi(str.c_str());
 		}
+        // univariate LMM: cPar.a_mode = 1
 		else if (strcmp(argv[i], "-fa")==0 || strcmp(argv[i], "-lmm")==0) {
 			if (cPar.a_mode!=0) {cPar.error=true; cout<<"error! only one of -gk -gs -eigen -vc -lm -lmm -bslmm -predict -calccor options is allowed."<<endl; break;}
 			if(argv[i+1] == NULL || argv[i+1][0] == '-') {cPar.a_mode=1; continue;}
@@ -2435,7 +2436,7 @@ void GEMMA::BatchRun (PARAM &cPar)
 
 
 
-
+// write results into a *.log.txt file
 void GEMMA::WriteLog (int argc, char ** argv, PARAM &cPar)
 {
 	string file_str;
@@ -2568,13 +2569,13 @@ void GEMMA::WriteLog (int argc, char ** argv, PARAM &cPar)
 	      outfile<<"  "<<cPar.v_se_enrich[i];
 	    }
 	    outfile<<endl;
-	} else {
+	} else {  // usual output format
 	  outfile<<"## number of total individuals = "<<cPar.ni_total<<endl;
 
 	  if (cPar.a_mode==43) {
 	    outfile<<"## number of analyzed individuals = "<<cPar.ni_cvt<<endl;
 	    outfile<<"## number of individuals with full phenotypes = "<<cPar.ni_test<<endl;
-	  } else if (cPar.a_mode!=27 && cPar.a_mode!=28) {
+	  } else if (cPar.a_mode!=27 && cPar.a_mode!=28) {  // usual outputs
 	    outfile<<"## number of analyzed individuals = "<<cPar.ni_test<<endl;
 	  }
 
@@ -2592,8 +2593,8 @@ void GEMMA::WriteLog (int argc, char ** argv, PARAM &cPar)
 	    outfile<<"## number of total genes = "<<cPar.ng_total<<endl;
 	    outfile<<"## number of analyzed genes = "<<cPar.ng_test<<endl;
 	  } else if (cPar.file_epm.empty()) {
-	    outfile<<"## number of total SNPs = "<<cPar.ns_total<<endl;
-	    outfile<<"## number of analyzed SNPs = "<<cPar.ns_test<<endl;
+	    outfile<<"## number of total loci = "<<cPar.ns_total<<endl;  // Loci may be SNPs.
+	    outfile<<"## number of analyzed loci = "<<cPar.ns_test<<endl;
 	  } else {
 	    outfile<<"## number of analyzed SNPs = "<<cPar.ns_test<<endl;
 	  }
@@ -2664,27 +2665,29 @@ void GEMMA::WriteLog (int argc, char ** argv, PARAM &cPar)
 	  }
 	}
 
+    // outputs of LMM etc
 	if (cPar.a_mode==1 || cPar.a_mode==2 || cPar.a_mode==3 || cPar.a_mode==4 || cPar.a_mode==5 || cPar.a_mode==11 || cPar.a_mode==12 || cPar.a_mode==13) {
 		outfile<<"## REMLE log-likelihood in the null model = "<<cPar.logl_remle_H0<<endl;
 		outfile<<"## MLE log-likelihood in the null model = "<<cPar.logl_mle_H0<<endl;
-		if (cPar.n_ph==1) {
-			//outfile<<"## lambda REMLE estimate in the null (linear mixed) model = "<<cPar.l_remle_null<<endl;
-			//outfile<<"## lambda MLE estimate in the null (linear mixed) model = "<<cPar.l_mle_null<<endl;
+		if (cPar.n_ph==1) {  // when there is only a single phenotype analysed
+			outfile<<"## lambda REMLE estimate in the null (linear mixed) model = "<<cPar.l_remle_null<<endl;
+			outfile<<"## lambda MLE estimate in the null (linear mixed) model = "<<cPar.l_mle_null<<endl;
 			outfile<<"## pve estimate in the null model = "<<cPar.pve_null<<endl;
 			outfile<<"## se(pve) in the null model = "<<cPar.pve_se_null<<endl;
 			outfile<<"## vg estimate in the null model = "<<cPar.vg_remle_null<<endl;
 			outfile<<"## ve estimate in the null model = "<<cPar.ve_remle_null<<endl;
-			outfile<<"## beta estimate in the null model = ";
+            /*
+			outfile<<"## (REMLE) beta estimate in the null model = ";
 			for (size_t i=0; i<cPar.beta_remle_null.size(); i++) {
 				outfile<<"  "<<cPar.beta_remle_null[i];
 			}
 			outfile<<endl;
-			outfile<<"## se(beta) = ";
+			outfile<<"## (REMLE) se(beta) = ";
 			for (size_t i=0; i<cPar.se_beta_remle_null.size(); i++) {
 				outfile<<"  "<<cPar.se_beta_remle_null[i];
 			}
 			outfile<<endl;
-
+            */
 		} else {
 			size_t c;
 			outfile<<"## REMLE estimate for Vg in the null model: "<<endl;
