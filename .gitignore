@@ -2,3 +2,5 @@
 *.o
 *.tar.gz
 bin/
+.komodotools/
+.komodoproject
