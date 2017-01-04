@@ -110,6 +110,7 @@ void LMM::CopyToParam (PARAM &cPar)
 
 
 
+// write results into a [prefix].assoc.txt file
 void LMM::WriteFiles ()
 {
 	string file_str;
@@ -119,59 +120,64 @@ void LMM::WriteFiles ()
 	ofstream outfile (file_str.c_str(), ofstream::out);
 	if (!outfile) {cout<<"error writing file: "<<file_str.c_str()<<endl; return;}
 
-	if (!file_gene.empty()) {
+	if (!file_gene.empty()) {  // RNAseq data
 		outfile<<"geneID"<<"\t";
 
 		if (a_mode==1) {
-			outfile<<"beta"<<"\t"<<"se"<<"\t"<<"l_remle"<<"\t"<<"p_wald"<<endl;
+			outfile<<"beta"<<"\t"<<"se"<<"\t"<<"l_remle"<<"\t"<<"p_wald"<<"\t"<<"logl_H1"<<endl;
 		} else if (a_mode==2) {
-			outfile<<"l_mle"<<"\t"<<"p_lrt"<<endl;
+			outfile<<"l_mle"<<"\t"<<"p_lrt"<<"\t"<<"logl_H1"<<endl;
 		} else if (a_mode==3) {
 			outfile<<"beta"<<"\t"<<"se"<<"\t"<<"p_score"<<endl;
 		} else if (a_mode==4) {
-			outfile<<"beta"<<"\t"<<"se"<<"\t"<<"l_remle"<<"\t"<<"l_mle"<<"\t"<<"p_wald"<<"\t"<<"p_lrt"<<"\t"<<"p_score"<<endl;
+			outfile<<"beta"<<"\t"<<"se"<<"\t"<<"l_remle"<<"\t"<<"l_mle"<<"\t"<<"p_wald"<<"\t"<<"p_lrt"<<"\t"<<"p_score"<<"\t"<<"logl_H1"<<endl;
 		} else {}
 
 		for (vector<SUMSTAT>::size_type t=0; t<sumStat.size(); ++t) {
 			outfile<<snpInfo[t].rs_number<<"\t";
 
 			if (a_mode==1) {
-				outfile<<scientific<<setprecision(6)<<sumStat[t].beta<<"\t"<<sumStat[t].se<<"\t"<<sumStat[t].lambda_remle<<"\t"<<sumStat[t].p_wald <<endl;
+				outfile<<scientific<<setprecision(6)<<sumStat[t].beta<<"\t"<<sumStat[t].se<<"\t"<<sumStat[t].lambda_remle<<"\t"<<sumStat[t].p_wald<<"\t"<<sumStat[t].logl_H1<<endl;
 			} else if (a_mode==2) {
-				outfile<<scientific<<setprecision(6)<<sumStat[t].lambda_mle<<"\t"<<sumStat[t].p_lrt<<endl;
+				outfile<<scientific<<setprecision(6)<<sumStat[t].lambda_mle<<"\t"<<sumStat[t].p_lrt<<"\t"<<sumStat[t].logl_H1<<endl;
 			} else if (a_mode==3) {
 				outfile<<scientific<<setprecision(6)<<sumStat[t].beta<<"\t"<<sumStat[t].se<<"\t"<<sumStat[t].p_score<<endl;
 			} else if (a_mode==4) {
-				outfile<<scientific<<setprecision(6)<<sumStat[t].beta<<"\t"<<sumStat[t].se<<"\t"<<sumStat[t].lambda_remle<<"\t"<<sumStat[t].lambda_mle<<"\t"<<sumStat[t].p_wald <<"\t"<<sumStat[t].p_lrt<<"\t"<<sumStat[t].p_score<<endl;
+				outfile<<scientific<<setprecision(6)<<sumStat[t].beta<<"\t"<<sumStat[t].se<<"\t"<<sumStat[t].lambda_remle<<"\t"<<sumStat[t].lambda_mle<<"\t"<<sumStat[t].p_wald <<"\t"<<sumStat[t].p_lrt<<"\t"<<sumStat[t].p_score<<"\t"<<sumStat[t].logl_H1<<endl;
 			} else {}
 		}
-	}  else {
-		outfile<<"chr"<<"\t"<<"rs"<<"\t"<<"ps"<<"\t"<<"n_miss"<<"\t"<<"allele1"<<"\t"<<"allele0"<<"\t"<<"af"<<"\t";
+	}  else {  // data of SNPs or other kinds of loci
+        // first, print the header
+		outfile<<"chr"<<"\t"<<"rs"<<"\t"<<"ps"<<"\t"<<"n_miss"<<"\t"<<"allele1"<<"\t"<<"allele0"<<"\t"<<"af"<<"\t";  // The outfile is not flushed into the out stream yet.
 
-		if (a_mode==1) {
-			outfile<<"beta"<<"\t"<<"se"<<"\t"<<"l_remle"<<"\t"<<"p_wald"<<endl;
-		} else if (a_mode==2) {
-			outfile<<"l_mle"<<"\t"<<"p_lrt"<<endl;
-		} else if (a_mode==3) {
+        // It concatenates with other fields here.
+		if (a_mode==1) {  // Wald tests for REML estimates; no logl_H0 is available for REML or likelihood-ratio tests.
+			outfile<<"beta"<<"\t"<<"se"<<"\t"<<"l_remle"<<"\t"<<"p_wald"<<"\t"<<"logl_H1"<<endl;  // logl_H1: log-likelihood of the fitted LMM (with x)
+		} else if (a_mode==2) {  // likelihood-ratio tests: beta is considered as a constant hence no se. is available; GEMMA does not calculate MLE of beta as it is not very useful.
+			outfile<<"l_mle"<<"\t"<<"p_lrt"<<"\t"<<"logl_H1"<<endl;
+		} else if (a_mode==3) {  // score tests
 			outfile<<"beta"<<"\t"<<"se"<<"\t"<<"p_score"<<endl;
-		} else if (a_mode==4) {
-			outfile<<"beta"<<"\t"<<"se"<<"\t"<<"l_remle"<<"\t"<<"l_mle"<<"\t"<<"p_wald"<<"\t"<<"p_lrt"<<"\t"<<"p_score"<<endl;
+		} else if (a_mode==4) {  // all of three kinds of tests
+			outfile<<"beta"<<"\t"<<"se"<<"\t"<<"l_remle"<<"\t"<<"l_mle"<<"\t"<<"p_wald"<<"\t"<<"p_lrt"<<"\t"<<"p_score"<<"\t"<<"logl_H1"<<endl;
 		} else {}
 
+        // next, print every line of the results
 		size_t t=0;
 		for (size_t i=0; i<snpInfo.size(); ++i) {
 			if (indicator_snp[i]==0) {continue;}
 
-			outfile<<snpInfo[i].chr<<"\t"<<snpInfo[i].rs_number<<"\t"<<snpInfo[i].base_position<<"\t"<<snpInfo[i].n_miss<<"\t"<<snpInfo[i].a_minor<<"\t"<<snpInfo[i].a_major<<"\t"<<fixed<<setprecision(3)<<snpInfo[i].maf<<"\t";
+            // loci information
+			outfile<<snpInfo[i].chr<<"\t"<<snpInfo[i].rs_number<<"\t"<<snpInfo[i].base_position<<"\t"<<snpInfo[i].n_miss<<"\t"<<snpInfo[i].a_minor<<"\t"<<snpInfo[i].a_major<<"\t"<<fixed<<setprecision(3)<<snpInfo[i].maf<<"\t";  // no flush yet
 
+            // summary statistics of every locus, concatenated with the loci information
 			if (a_mode==1) {
-				outfile<<scientific<<setprecision(6)<<sumStat[t].beta<<"\t"<<sumStat[t].se<<"\t"<<sumStat[t].lambda_remle<<"\t"<<sumStat[t].p_wald <<endl;
+				outfile<<scientific<<setprecision(6)<<sumStat[t].beta<<"\t"<<sumStat[t].se<<"\t"<<sumStat[t].lambda_remle<<"\t"<<sumStat[t].p_wald<<"\t"<<sumStat[t].logl_H1<<endl;
 			} else if (a_mode==2) {
-				outfile<<scientific<<setprecision(6)<<sumStat[t].lambda_mle<<"\t"<<sumStat[t].p_lrt<<endl;
+				outfile<<scientific<<setprecision(6)<<sumStat[t].lambda_mle<<"\t"<<sumStat[t].p_lrt<<"\t"<<sumStat[t].logl_H1<<endl;
 			} else if (a_mode==3) {
 				outfile<<scientific<<setprecision(6)<<sumStat[t].beta<<"\t"<<sumStat[t].se<<"\t"<<sumStat[t].p_score<<endl;
 			} else if (a_mode==4) {
-				outfile<<scientific<<setprecision(6)<<sumStat[t].beta<<"\t"<<sumStat[t].se<<"\t"<<sumStat[t].lambda_remle<<"\t"<<sumStat[t].lambda_mle<<"\t"<<sumStat[t].p_wald <<"\t"<<sumStat[t].p_lrt<<"\t"<<sumStat[t].p_score<<endl;
+				outfile<<scientific<<setprecision(6)<<sumStat[t].beta<<"\t"<<sumStat[t].se<<"\t"<<sumStat[t].lambda_remle<<"\t"<<sumStat[t].lambda_mle<<"\t"<<sumStat[t].p_wald <<"\t"<<sumStat[t].p_lrt<<"\t"<<sumStat[t].p_score<<"\t"<<sumStat[t].logl_H1<<endl;
 			} else {}
 			t++;
 		}
@@ -882,13 +888,13 @@ void LogRL_dev12 (double l, void *params, double *dev1, double *dev2)
 
 
 
-
+// Perform a Wald test for beta estimated using REML
 void LMM::CalcRLWald (const double &l, const FUNC_PARAM &params, double &beta, double &se, double &p_wald)
 {
 	size_t n_cvt=params.n_cvt;
 	size_t n_index=(n_cvt+2+1)*(n_cvt+2)/2;
 
-	int df=(int)ni_test-(int)n_cvt-1;
+	int df=(int)ni_test-(int)n_cvt-1;  // degree of freedom: n - c - 1; cvt: covariantes
 
 	gsl_matrix *Pab=gsl_matrix_alloc (n_cvt+2, n_index);
 	gsl_vector *Hi_eval=gsl_vector_alloc(params.eval->size);
@@ -905,6 +911,8 @@ void LMM::CalcRLWald (const double &l, const FUNC_PARAM &params, double &beta, d
 	size_t index_yy=GetabIndex (n_cvt+2, n_cvt+2, n_cvt);
 	size_t index_xx=GetabIndex (n_cvt+1, n_cvt+1, n_cvt);
 	size_t index_xy=GetabIndex (n_cvt+2, n_cvt+1, n_cvt);
+    
+    // four matrices that are required for calculating REMLEs of beta and var(beta); cf. the supplementary note of the GEMMA paper.
 	double P_yy=gsl_matrix_get (Pab, n_cvt, index_yy);
 	double P_xx=gsl_matrix_get (Pab, n_cvt, index_xx);
 	double P_xy=gsl_matrix_get (Pab, n_cvt, index_xy);
@@ -912,8 +920,8 @@ void LMM::CalcRLWald (const double &l, const FUNC_PARAM &params, double &beta, d
 
 	beta=P_xy/P_xx;
 	double tau=(double)df/Px_yy;
-	se=sqrt(1.0/(tau*P_xx));
-	p_wald=gsl_cdf_fdist_Q ((P_yy-Px_yy)*tau, 1.0, df);
+	se=sqrt(1.0/(tau*P_xx));  // se = standard deviation according to its formula on the supplementary note
+	p_wald=gsl_cdf_fdist_Q ((P_yy-Px_yy)*tau, 1.0, df);  // calculate the P value based on an F distribution with a degree of freedom of n - c - 1
 //	p_wald=gsl_cdf_chisq_Q ((P_yy-Px_yy)*tau, 1);
 
 	gsl_matrix_free (Pab);
@@ -1184,7 +1192,7 @@ void LMM::AnalyzeGene (const gsl_matrix *U, const gsl_vector *eval, const gsl_ma
 		time_opt+=(clock()-time_start)/(double(CLOCKS_PER_SEC)*60.0);
 
 		//store summary data
-		SUMSTAT SNPs={beta, se, lambda_remle, lambda_mle, p_wald, p_lrt, p_score};
+		SUMSTAT SNPs={beta, se, lambda_remle, lambda_mle, p_wald, p_lrt, p_score, logl_H1};
 		sumStat.push_back(SNPs);
     }
 	cout<<endl;
@@ -1326,13 +1334,13 @@ void LMM::AnalyzeBimbam (const gsl_matrix *U, const gsl_vector *eval, const gsl_
 		      CalcRLScore (l_mle_null, param1, beta, se, p_score);
 		    }
 
-		    if (a_mode==1 || a_mode==4) {
-		      CalcLambda ('R', param1, l_min, l_max, n_region, lambda_remle, logl_H1);
+		    if (a_mode==1 || a_mode==4) {  // REML
+		      CalcLambda ('R', param1, l_min, l_max, n_region, lambda_remle, logl_H1);  // It changes logl_H1.
 		      CalcRLWald (lambda_remle, param1, beta, se, p_wald);
 		    }
 
-		    if (a_mode==2 || a_mode==4) {
-		      CalcLambda ('L', param1, l_min, l_max, n_region, lambda_mle, logl_H1);
+		    if (a_mode==2 || a_mode==4) {  // Likelihood-ratio tests do not change initial beta and se values because the authors do not think they are important.
+		      CalcLambda ('L', param1, l_min, l_max, n_region, lambda_mle, logl_H1);  // when -lmm = 4, REML logl_H1 is override with that from the MLE; I do not expect users to use -lmm 4.
 		      p_lrt=gsl_cdf_chisq_Q (2.0*(logl_H1-logl_mle_H0), 1);
 		    }
 
@@ -1341,8 +1349,8 @@ void LMM::AnalyzeBimbam (const gsl_matrix *U, const gsl_vector *eval, const gsl_
 
 		    time_opt+=(clock()-time_start)/(double(CLOCKS_PER_SEC)*60.0);
 
-		    //store summary data
-		    SUMSTAT SNPs={beta, se, lambda_remle, lambda_mle, p_wald, p_lrt, p_score};
+		    //store summary data; the SUMSTAT class is defined in param.h.
+		    SUMSTAT SNPs={beta, se, lambda_remle, lambda_mle, p_wald, p_lrt, p_score, logl_H1};
 
 		    sumStat.push_back(SNPs);
 		  }
@@ -1518,7 +1526,7 @@ void LMM::AnalyzePlink (const gsl_matrix *U, const gsl_vector *eval, const gsl_m
 		    time_opt+=(clock()-time_start)/(double(CLOCKS_PER_SEC)*60.0);
 
 		    //store summary data
-		    SUMSTAT SNPs={beta, se, lambda_remle, lambda_mle, p_wald, p_lrt, p_score};
+		    SUMSTAT SNPs={beta, se, lambda_remle, lambda_mle, p_wald, p_lrt, p_score, logl_H1};
 		    sumStat.push_back(SNPs);
 		  }
 		}

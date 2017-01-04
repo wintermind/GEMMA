@@ -48,13 +48,14 @@ public:
 //results for lmm
 class SUMSTAT {
 public:
-	double beta;				//REML estimator for beta
+	double beta;				//ML or REML estimator for beta
 	double se;				//SE for beta
 	double lambda_remle;		//REML estimator for lambda
 	double lambda_mle;		//MLE estimator for lambda
 	double p_wald;			//p value from a Wald test
 	double p_lrt;				//p value from a likelihood ratio test
 	double p_score;			//p value from a score test
+    double logl_H1;			// log-likelihood under the alternative model
 };
 
 //results for mvlmm

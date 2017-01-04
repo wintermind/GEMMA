@@ -848,7 +848,7 @@ void GEMMA::Assign(int argc, char ** argv, PARAM &cPar)
         // univariate LMM: cPar.a_mode = 1
 		else if (strcmp(argv[i], "-fa")==0 || strcmp(argv[i], "-lmm")==0) {
 			if (cPar.a_mode!=0) {cPar.error=true; cout<<"error! only one of -gk -gs -eigen -vc -lm -lmm -bslmm -predict -calccor options is allowed."<<endl; break;}
-			if(argv[i+1] == NULL || argv[i+1][0] == '-') {cPar.a_mode=1; continue;}
+			if(argv[i+1] == NULL || argv[i+1][0] == '-') {cPar.a_mode=1; continue;}  // skip the following steps and start a new loop under the "for" statement
 			++i;
 			str.clear();
 			str.assign(argv[i]);
