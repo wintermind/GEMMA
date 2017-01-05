@@ -61,7 +61,7 @@ using namespace std;
 
 
 GEMMA::GEMMA(void):
-version("0.95alpha"), date("07/24/2016"), year("2011")
+version("0.95a.1"), date("5/Jan/2017"), year("2011")
 {}
 
 void GEMMA::PrintHeader (void)
@@ -72,6 +72,7 @@ void GEMMA::PrintHeader (void)
 	cout<<"  Version "<<version<<", "<<date<<"                              "<<endl;
 	cout<<"  Visit http://www.xzlab.org/software.html For Updates   "<<endl;
 	cout<<"  (C) "<<year<<" Xiang Zhou                                   "<<endl;
+    cout<<"  Modified by Yu Wan                                     "<<endl;
 	cout<<"  GNU General Public License                             "<<endl;
 	cout<<"  For Help, Type ./gemma -h                              "<<endl;
 	cout<<"*********************************************************"<<endl;
@@ -124,6 +125,7 @@ void GEMMA::PrintHelp(size_t option)
 		cout<<endl;
 		cout<<" GEMMA version "<<version<<", released on "<<date<<endl;
 		cout<<" implemented by Xiang Zhou"<<endl;
+        cout<<" modified by Yu Wan"<<endl;
 		cout<<endl;
 		cout<<" type ./gemma -h [num] for detailed helps"<<endl;
 		cout<<" options: " << endl;
