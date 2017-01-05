@@ -53,7 +53,7 @@ HDR =
 
 LIBS_LNX_D_LAPACK = -llapack
 LIBS_MAC_D_LAPACK = -framework Veclib
-LIBS_LNX_S_LAPACK = /usr/lib/lapack/liblapack.a -lgfortran  /usr/lib/atlas-base/libatlas.a /usr/lib/libblas/libblas.a -Wl,--allow-multiple-definition 
+LIBS_LNX_S_LAPACK = /usr/lib/lapack/liblapack.a -lgfortran  /usr/lib/atlas-base/libatlas.a /usr/lib/libblas/libblas.a -Wl,--allow-multiple-definition -lquadmath
 
 # Options
 
