@@ -158,6 +158,7 @@ void LMM::WriteFiles ()
 		} else if (a_mode==3) {  // score tests
 			outfile<<"beta"<<"\t"<<"se"<<"\t"<<"p_score"<<endl;
 		} else if (a_mode==4) {  // all of three kinds of tests
+			// According to AnalyzeBimbam, logl_H1 refers the ML; p_wald, beta and se refer to REML; p_score refers to Bayesian LMMs.
 			outfile<<"beta"<<"\t"<<"se"<<"\t"<<"l_remle"<<"\t"<<"l_mle"<<"\t"<<"p_wald"<<"\t"<<"p_lrt"<<"\t"<<"p_score"<<"\t"<<"logl_H1"<<endl;
 		} else {}
 
