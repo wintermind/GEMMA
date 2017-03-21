@@ -2501,7 +2501,7 @@ bool bgenKin (const string &file_oxford, vector<int> &indicator_snp, const int k
 
 
 //read header to determine which column contains which item
-bool ReadHeader (const string &line, HEADER &header)
+static bool ReadHeader (const string &line, HEADER &header)
 {
   string rs_ptr[]={"rs","RS","snp","SNP","snps","SNPS","snpid","SNPID","rsid","RSID","MarkerName"};
   set<string> rs_set(rs_ptr, rs_ptr+11);

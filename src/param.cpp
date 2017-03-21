@@ -961,8 +961,8 @@ void compAKtoS (const gsl_matrix *A, const gsl_matrix *K, const size_t n_cvt, gs
 
 //copied from lmm.cpp; is used in the following function compKtoV
 //map a number 1-(n_cvt+2) to an index between 0 and [(n_c+2)^2+(n_c+2)]/2-1
-size_t GetabIndex (const size_t a, const size_t b, const size_t n_cvt) {
-	if (a>n_cvt+2 || b>n_cvt+2 || a<=0 || b<=0) {cout<<"error in GetabIndex."<<endl; return 0;}
+size_t GetabIndexParam (const size_t a, const size_t b, const size_t n_cvt) {
+	if (a>n_cvt+2 || b>n_cvt+2 || a<=0 || b<=0) {cout<<"error in GetabIndexParam."<<endl; return 0;}
 	size_t index;
 	size_t l, h;
 	if (b>a) {l=a; h=b;} else {l=b; h=a;}
@@ -1028,13 +1028,13 @@ void compKtoV (const gsl_matrix *G, gsl_matrix *V) {
   //compute V
   for (size_t i=0; i<n_vc; i++) {
     for (size_t j=i; j<n_vc; j++) {
-      t_ij=GetabIndex (i+1, j+1, n_vc-2);
+      t_ij=GetabIndexParam (i+1, j+1, n_vc-2);
       for (size_t l=0; l<n_vc+1; l++) {
 	for (size_t m=0; m<n_vc+1; m++) {
 	  if (l!=n_vc && m!=n_vc) {
-	    t_il=GetabIndex (i+1, l+1, n_vc-2);
-	    t_jm=GetabIndex (j+1, m+1, n_vc-2);
-	    t_lm=GetabIndex (l+1, m+1, n_vc-2);
+	    t_il=GetabIndexParam (i+1, l+1, n_vc-2);
+	    t_jm=GetabIndexParam (j+1, m+1, n_vc-2);
+	    t_lm=GetabIndexParam (l+1, m+1, n_vc-2);
 	    //cout<<ni_test<<" "<<r<<t_ij<<" "<<t_il<<" "<<t_jl<<" "<<endl;
 	    tr=0;
 	    for (size_t k=0; k<ni_test; k++) {
@@ -1079,8 +1079,8 @@ void compKtoV (const gsl_matrix *G, gsl_matrix *V) {
 
 	    tr+=r*r*gsl_vector_get (trKiKj, t_lm);
 	  } else if (l!=n_vc && m==n_vc) {
-	    t_il=GetabIndex (i+1, l+1, n_vc-2);
-	    t_jl=GetabIndex (j+1, l+1, n_vc-2);
+	    t_il=GetabIndexParam (i+1, l+1, n_vc-2);
+	    t_jl=GetabIndexParam (j+1, l+1, n_vc-2);
 	    tr=0;
 	    for (size_t k=0; k<ni_test; k++) {
 	      gsl_vector_const_view KiKl_row=gsl_matrix_const_subrow (KiKj, k, t_il*ni_test, ni_test);
@@ -1097,8 +1097,8 @@ void compKtoV (const gsl_matrix *G, gsl_matrix *V) {
 	    }
 	    tr+=-r*gsl_vector_get (trKiKj, t_il)-r*gsl_vector_get (trKiKj, t_jl)+r*r*gsl_vector_get (trKi, l);
 	  } else if (l==n_vc && m!=n_vc) {
-	    t_jm=GetabIndex (j+1, m+1, n_vc-2);
-	    t_im=GetabIndex (i+1, m+1, n_vc-2);
+	    t_jm=GetabIndexParam (j+1, m+1, n_vc-2);
+	    t_im=GetabIndexParam (i+1, m+1, n_vc-2);
 	    tr=0;
 	    for (size_t k=0; k<ni_test; k++) {
 	      gsl_vector_const_view KjKm_row=gsl_matrix_const_subrow (KiKj, k, t_jm*ni_test, ni_test);
